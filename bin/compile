@@ -130,7 +130,7 @@ rm -f \$pmsgr
 mkfifo \$pmsgr
 
 
-eval $(echo \$ELASTICSEARCH_URL | sed -r 's/(https?:\/\/)((.*):(.*)@){0,1}(.*)/ELASTICSEARCH_URL=\1\5 \nELASTICSEARCH_USER=\3 \nELASTICSEARCH_PASSWORD=\4/')
+eval \$(echo \$ELASTICSEARCH_URL | sed -r 's/(https?:\/\/)((.*):(.*)@){0,1}(.*)/ELASTICSEARCH_URL=\1\5 \nELASTICSEARCH_USER=\3 \nELASTICSEARCH_PASSWORD=\4/')
 
 if [[ -n "\$ELASTICSEARCH_USER" && -n "\$ELASTICSEARCH_PASSWORD" ]] ; then
   export ELASTICSEARCH_AUTH=$(echo -n \$ELASTICSEARCH_USER:\$ELASTICSEARCH_PASSWORD | base64)
