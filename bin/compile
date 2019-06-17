@@ -86,15 +86,18 @@ if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
   $configure_password $KIBANA_DIR/config/kibana.yml
 fi
 
+cd $KIBANA_DIR
+echo "-----> Remove the x-pack plugin"
+./bin/kibana-plugin remove "x-pack" | indent
+
 if [ -f "$BUILD_DIR/kibana-plugins" ] ; then
   echo "-----> 'kibana-plugins' file detected"
-  cd $KIBANA_DIR
     cat "${BUILD_DIR}/kibana-plugins" | while read plugin ; do
       echo "       Installing Kibana plugin '${plugin}'"
       ./bin/kibana-plugin install "${plugin}" | indent
     done
-  cd $BUILD_DIR
 fi
+cd $BUILD_DIR
 
 if [ -f "$BUILD_DIR/plugins-config" ] ; then
   echo "-----> 'plugins-config' file detected"
