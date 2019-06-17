@@ -23,15 +23,17 @@ fi
 if [ -f "$ENV_DIR/DOWNLOAD_URL" ]; then
   DOWNLOAD_URL=$(cat $ENV_DIR/DOWNLOAD_URL)
 else
-  DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/kibana-6.6.1-linux-x86_64.tar.gz"
+  DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/kibana-oss-6.6.1-linux-x86_64.tar.gz"
 fi
 
 KIBANA_PACKAGE=${DOWNLOAD_URL##*/}
 KIBANA_BASE_DIR=$(basename $KIBANA_PACKAGE .tar.gz)
+KIBANA_RUNTIME_DIR=`echo $KIBANA_BASE_DIR | sed 's/-oss//'`
 
 case ${KIBANA_PACKAGE} in
   *.tar.gz)
     KIBANA_DIR="$BUILD_DIR/${KIBANA_PACKAGE%%.tar.gz}"
+    KIBANA_DIR=`echo $KIBANA_DIR | sed 's/\-oss//'`
     tar="tar xz"
     ;;
   *)
@@ -151,14 +153,14 @@ erb "\$basedir/vendor/nginx/conf/nginx.conf.erb" > "\$basedir/vendor/nginx/conf/
 if [ -n "$ELASTICSEARCH_TLS_CA_URL" ] ; then
   echo "-----> Downloading Elasticsearch CA Certificate"
   curl -L -s "$ELASTICSEARCH_TLS_CA_URL" -o /app/ca.crt
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
 elif [ -n "$ELASTICSEARCH_TLS_CA_PATH" ] ; then
   echo "-----> Configuring Elasticsearch CA Certificate"
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
 fi
 
 (
-    "\$basedir/${KIBANA_BASE_DIR}/bin/kibana.orig" --port 8000
+    "\$basedir/${KIBANA_RUNTIME_DIR}/bin/kibana.orig" --port 8000
     echo "kibana" > \$pmsgr
 ) &
 
@@ -172,6 +174,6 @@ chmod +x "${KIBANA_DIR}/bin/kibana"
 echo "Exporting PATH" | indent
 
 cat <<EOF > $INIT_SCRIPT
-export PATH="$PATH:${KIBANA_DIR##*/}/bin"
+export PATH="$PATH:${KIBANA_RUNTIME_DIR##*/}/bin"
 export NODE_OPTIONS="${NODE_OPTIONS:-"--max-old-space-size=512"}"
 EOF
