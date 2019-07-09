@@ -29,6 +29,7 @@ fi
 KIBANA_PACKAGE=${DOWNLOAD_URL##*/}
 KIBANA_BASE_DIR=$(basename $KIBANA_PACKAGE .tar.gz)
 KIBANA_RUNTIME_DIR=`echo $KIBANA_BASE_DIR | sed 's/-oss//'`
+ES_SSL_VERIFICATION_MODE=${ES_SSL_VERIFICATION_MODE:-full}
 
 case ${KIBANA_PACKAGE} in
   *.tar.gz)
@@ -92,9 +93,7 @@ cd $KIBANA_DIR
 echo "-----> Remove the x-pack plugin"
 ./bin/kibana-plugin remove "x-pack" | indent
 
-if [ -n "ES_SSL_VERIFICATION_MODE" ] ; then
-  $configure_ssl_verify $KIBANA_DIR/config/kibana.yml
-fi
+$configure_ssl_verify $KIBANA_DIR/config/kibana.yml
 
 if [ -f "$BUILD_DIR/kibana-plugins" ] ; then
   echo "-----> 'kibana-plugins' file detected"
