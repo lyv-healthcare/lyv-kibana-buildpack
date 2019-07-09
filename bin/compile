@@ -53,7 +53,7 @@ configure_url='sed -i -r s/\#(elasticsearch.hosts:\x20).{1,}/\1["'$(echo $ELASTI
 configure_host='sed -i -r s/\#(server.host:\x20).{1,}/\1"0.0.0.0"/'
 configure_user='sed -i -r s/\#(elasticsearch.username:\x20).{1,}/\1"'$ELASTICSEARCH_USER'"/'
 configure_password='sed -i -r s/\#(elasticsearch.password:\x20).{1,}/\1"'$ELASTICSEARCH_PASSWORD'"/'
-
+configure_ssl_verify='sed -i -r s/\#(elasticsearch.ssl.verificationMode:\x20).{1,}/\1"'$ES_SSL_VERIFICATION_MODE'"/'
 
 echo "-----> Installing Kibana..."
 
@@ -91,6 +91,10 @@ fi
 cd $KIBANA_DIR
 echo "-----> Remove the x-pack plugin"
 ./bin/kibana-plugin remove "x-pack" | indent
+
+if [ -n "ES_SSL_VERIFICATION_MODE" ] ; then
+  $configure_ssl_verify $KIBANA_DIR/config/kibana.yml
+fi
 
 if [ -f "$BUILD_DIR/kibana-plugins" ] ; then
   echo "-----> 'kibana-plugins' file detected"
@@ -137,10 +141,10 @@ rm -f \$pmsgr
 mkfifo \$pmsgr
 
 
-eval $(echo $ELASTICSEARCH_URL | sed -r 's/(https?:\/\/)((.*):(.*)@){0,1}(.*)/ELASTICSEARCH_URL=\1\5 \nELASTICSEARCH_USER=\3 \nELASTICSEARCH_PASSWORD=\4/')
+eval \$(echo \$ELASTICSEARCH_URL | sed -r 's/(https?:\/\/)((.*):(.*)@){0,1}(.*)/ELASTICSEARCH_URL=\1\5 \nELASTICSEARCH_USER=\3 \nELASTICSEARCH_PASSWORD=\4/')
 
-if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
-  export ELASTICSEARCH_AUTH=$(echo -n $ELASTICSEARCH_USER:$ELASTICSEARCH_PASSWORD | base64)
+if [[ -n "\$ELASTICSEARCH_USER" && -n "\$ELASTICSEARCH_PASSWORD" ]] ; then
+  export ELASTICSEARCH_AUTH=\$(echo -n \$ELASTICSEARCH_USER:\$ELASTICSEARCH_PASSWORD | base64)
 fi
 
 erb "\$basedir/vendor/nginx/conf/nginx.conf.erb" > "\$basedir/vendor/nginx/conf/nginx.conf"
@@ -150,13 +154,13 @@ erb "\$basedir/vendor/nginx/conf/nginx.conf.erb" > "\$basedir/vendor/nginx/conf/
     echo "nginx" > \$pmsgr
 ) &
 
-if [ -n "$ELASTICSEARCH_TLS_CA_URL" ] ; then
+if [ -n "\$ELASTICSEARCH_TLS_CA_URL" ] ; then
   echo "-----> Downloading Elasticsearch CA Certificate"
-  curl -L -s "$ELASTICSEARCH_TLS_CA_URL" -o /app/ca.crt
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
-elif [ -n "$ELASTICSEARCH_TLS_CA_PATH" ] ; then
+  curl -L -s "\$ELASTICSEARCH_TLS_CA_URL" -o /app/ca.crt
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
+elif [ -n "\$ELASTICSEARCH_TLS_CA_PATH" ] ; then
   echo "-----> Configuring Elasticsearch CA Certificate"
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/\$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
 fi
 
 (
