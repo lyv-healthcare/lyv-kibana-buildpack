@@ -9,6 +9,8 @@ CACHE_DIR=$2
 ENV_DIR=$3
 basedir="$( cd -P "$( dirname "$0" )" && pwd )"
 
+cd $BUILD_DIR
+
 INIT_SCRIPT="$BUILD_DIR/.profile.d/kibana.sh"
 
 if [ -f "$ENV_DIR/ELASTICSEARCH_URL" ]; then
@@ -21,15 +23,18 @@ fi
 if [ -f "$ENV_DIR/DOWNLOAD_URL" ]; then
   DOWNLOAD_URL=$(cat $ENV_DIR/DOWNLOAD_URL)
 else
-  DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/kibana-5.5.0-linux-x86_64.tar.gz"
+  DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/kibana-oss-6.6.1-linux-x86_64.tar.gz"
 fi
 
 KIBANA_PACKAGE=${DOWNLOAD_URL##*/}
 KIBANA_BASE_DIR=$(basename $KIBANA_PACKAGE .tar.gz)
+KIBANA_RUNTIME_DIR=`echo $KIBANA_BASE_DIR | sed 's/-oss//'`
+ES_SSL_VERIFICATION_MODE=${ES_SSL_VERIFICATION_MODE:-full}
 
 case ${KIBANA_PACKAGE} in
   *.tar.gz)
     KIBANA_DIR="$BUILD_DIR/${KIBANA_PACKAGE%%.tar.gz}"
+    KIBANA_DIR=`echo $KIBANA_DIR | sed 's/\-oss//'`
     tar="tar xz"
     ;;
   *)
@@ -44,8 +49,8 @@ eval $(echo $ELASTICSEARCH_URL | sed -r 's/(https?:\/\/)((.*):(.*)@){0,1}(.*)/EL
 mkdir="mkdir -p"
 download="curl -sLO"
 extract="$tar -C $BUILD_DIR --wildcards -f"
-verify="sha1sum --check --warn -"
-configure_url='sed -i -r s/\#(elasticsearch.url:\x20).{1,}/\1"'$(echo $ELASTICSEARCH_URL | sed 's/\//\\\//g')'"/'
+verify="sha512sum --check --warn -"
+configure_url='sed -i -r s/\#(elasticsearch.hosts:\x20).{1,}/\1["'$(echo $ELASTICSEARCH_URL | sed 's/\//\\\//g')'"]/'
 configure_host='sed -i -r s/\#(server.host:\x20).{1,}/\1"0.0.0.0"/'
 configure_user='sed -i -r s/\#(elasticsearch.username:\x20).{1,}/\1"'$ELASTICSEARCH_USER'"/'
 configure_password='sed -i -r s/\#(elasticsearch.password:\x20).{1,}/\1"'$ELASTICSEARCH_PASSWORD'"/'
@@ -60,10 +65,10 @@ if [ ! -f "$CACHE_DIR/$KIBANA_PACKAGE" ]; then
   echo "downloading $DOWNLOAD_URL" | indent
   $download $DOWNLOAD_URL
 
-  echo "verifying against ${DOWNLOAD_URL}.sha1" | indent
-  $download "${DOWNLOAD_URL}.sha1"
-  echo "$(cat $KIBANA_PACKAGE.sha1) $KIBANA_PACKAGE" | $verify
+  echo "verifying against ${DOWNLOAD_URL}.sha512" | indent
+  $download "${DOWNLOAD_URL}.sha512"
 
+  sha512sum $KIBANA_PACKAGE.sha512
   if [ $? -eq 0 ]; then
     mv $KIBANA_PACKAGE $CACHE_DIR
   else
@@ -84,20 +89,20 @@ if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
   $configure_password $KIBANA_DIR/config/kibana.yml
 fi
 
-if [ -n "ES_SSL_VERIFICATION_MODE" ] ; then
-  $configure_ssl_verify $KIBANA_DIR/config/kibana.yml
-fi
+cd $KIBANA_DIR
+echo "-----> Remove the x-pack plugin"
+./bin/kibana-plugin remove "x-pack" | indent
 
+$configure_ssl_verify $KIBANA_DIR/config/kibana.yml
 
 if [ -f "$BUILD_DIR/kibana-plugins" ] ; then
   echo "-----> 'kibana-plugins' file detected"
-  cd $KIBANA_DIR
     cat "${BUILD_DIR}/kibana-plugins" | while read plugin ; do
       echo "       Installing Kibana plugin '${plugin}'"
       ./bin/kibana-plugin install "${plugin}" | indent
     done
-  cd $BUILD_DIR
 fi
+cd $BUILD_DIR
 
 if [ -f "$BUILD_DIR/plugins-config" ] ; then
   echo "-----> 'plugins-config' file detected"
@@ -158,7 +163,7 @@ elif [ -n "\$ELASTICSEARCH_TLS_CA_PATH" ] ; then
 fi
 
 (
-    "\$basedir/${KIBANA_BASE_DIR}/bin/kibana.orig" --port 8000
+    "\$basedir/${KIBANA_RUNTIME_DIR}/bin/kibana.orig" --port 8000
     echo "kibana" > \$pmsgr
 ) &
 
@@ -172,6 +177,6 @@ chmod +x "${KIBANA_DIR}/bin/kibana"
 echo "Exporting PATH" | indent
 
 cat <<EOF > $INIT_SCRIPT
-export PATH="$PATH:${KIBANA_DIR##*/}/bin"
+export PATH="$PATH:${KIBANA_RUNTIME_DIR##*/}/bin"
 export NODE_OPTIONS="${NODE_OPTIONS:-"--max-old-space-size=512"}"
 EOF
