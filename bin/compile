@@ -156,10 +156,10 @@ erb "\$basedir/vendor/nginx/conf/nginx.conf.erb" > "\$basedir/vendor/nginx/conf/
 if [ -n "\$ELASTICSEARCH_TLS_CA_URL" ] ; then
   echo "-----> Downloading Elasticsearch CA Certificate"
   curl -L -s "\$ELASTICSEARCH_TLS_CA_URL" -o /app/ca.crt
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/ca.crt\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
 elif [ -n "\$ELASTICSEARCH_TLS_CA_PATH" ] ; then
   echo "-----> Configuring Elasticsearch CA Certificate"
-  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/\$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_BASE_DIR/config/kibana.yml
+  echo "elasticsearch.ssl.certificateAuthorities: [ \"/app/\$ELASTICSEARCH_TLS_CA_PATH}\" ]" >> $KIBANA_RUNTIME_DIR/config/kibana.yml
 fi
 
 (
