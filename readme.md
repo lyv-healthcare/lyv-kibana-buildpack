@@ -35,7 +35,7 @@ create its indexes, then refresh and the dashboard will be available.
 
 Use the environment variable `ELASICSEARCH_TLS_CA_URL` to specify an URL to
 download the certificate from like
-[https://db-api.scalingo.com/api/ca_certificate](https://db-api.scalingo.com/api/ca_certificate).
+[https://db-api.osc-fr1.scalingo.com/api/ca_certificate](https://db-api.osc-fr1.scalingo.com/api/ca_certificate).
 
 Alternatively you can add the CA to your GIT repository and configure its path
 with the variable `ELASTICSEARCH_TLS_CA_PATH` (example: `ca.crt`)
