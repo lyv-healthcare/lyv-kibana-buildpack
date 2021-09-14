@@ -119,7 +119,7 @@ echo "-----> Installing reverse proxy for authentication"
 $mkdir "${BUILD_DIR}/vendor/nginx"
 
 NGINX_SWIFT_BUCKET=${NGINX_BP_SWIFT_BUCKET:-scalingo-php-buildpack}
-NGINX_SWIFT_BASE_URL=${NGINX_BP_SWIFT_URL:-https://storage.sbg.cloud.ovh.net/v1/AUTH_be65d32d71a6435589a419eac98613f2}
+NGINX_SWIFT_BASE_URL=${NGINX_BP_SWIFT_URL:-https://storage.gra.cloud.ovh.net/v1/AUTH_be65d32d71a6435589a419eac98613f2}
 NGINX_SWIFT_URL="${NGINX_SWIFT_BASE_URL}/${NGINX_SWIFT_BUCKET}/${STACK}"
 SEMVER_SERVER="https://semver.scalingo.io"
 DEFAULT_NGINX=$(curl --fail --location --silent "${SEMVER_SERVER}/nginx-${STACK}")
