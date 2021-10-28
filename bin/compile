@@ -89,7 +89,7 @@ echo "-----> Configuring ELASTICSEARCH_URL"
 $configure_url $KIBANA_DIR/config/kibana.yml
 
 if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
-  echo "-----> Configuring elasticsearch credientials"
+  echo "-----> Configuring Elasticsearch credentials"
   $configure_user $KIBANA_DIR/config/kibana.yml
   $configure_password $KIBANA_DIR/config/kibana.yml
 fi
