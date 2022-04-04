@@ -124,7 +124,7 @@ $mkdir "${BUILD_DIR}/vendor/nginx"
 
 NGINX_VENDOR_BASE_URL="${NGINX_VENDOR_URL:-https://nginx-buildpack.s3.amazonaws.com}"
 NGINX_VENDOR_URL="${NGINX_VENDOR_BASE_URL}/${STACK}"
-SEMVER_SERVER="https://semver.scalingo.io"
+SEMVER_SERVER="https://semver.scalingo.com"
 DEFAULT_NGINX=$(curl --fail --location --silent "${SEMVER_SERVER}/nginx-${STACK}")
 NGINX_VERSION=${NGINX_VERSION:-$DEFAULT_NGINX}
 NGINX_URL="$NGINX_VENDOR_URL/package/nginx-$NGINX_VERSION.tgz"
