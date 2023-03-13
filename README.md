@@ -75,3 +75,4 @@ longer directly reachable from the Internet.
 
 * `KIBANA_VERSION`: Kibana version to install (e.g. `6.8.23`)
 * `DOWNLOAD_URL`: Source of the kibana archive, default is: `https://artifacts.elastic.co/downloads/kibana/kibana-${KIBANA_VERSION}-linux-x86_64.tar.gz`
+* `LOG_LEVEL`: Specify the logging level of Kibana. Set the [`logging.root.level` configuration key](https://www.elastic.co/guide/en/kibana/current/logging-settings.html) in the Kibana config file. Options are `all`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `off`. Default is `info`.
