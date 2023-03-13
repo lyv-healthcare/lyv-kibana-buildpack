@@ -61,6 +61,8 @@ configure_host='sed -i -r s/\#(server.host:\x20).{1,}/\1"0.0.0.0"/'
 configure_user='sed -i -r s/\#(elasticsearch.username:\x20).{1,}/\1"'$ELASTICSEARCH_USER'"/'
 configure_password='sed -i -r s/\#(elasticsearch.password:\x20).{1,}/\1"'$ELASTICSEARCH_PASSWORD'"/'
 configure_ssl_verify='sed -i -r s/\#(elasticsearch.ssl.verificationMode:\x20).{1,}/\1"'$ES_SSL_VERIFICATION_MODE'"/'
+configure_log_level='sed -i -r s/\#(logger.root.level:\x20).{1,}/\1"'$LOG_LEVEL'"/'
+
 
 echo "-----> Installing Kibana..."
 
@@ -93,6 +95,11 @@ if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
   echo "-----> Configuring Elasticsearch credentials"
   $configure_user $KIBANA_DIR/config/kibana.yml
   $configure_password $KIBANA_DIR/config/kibana.yml
+fi
+
+if [[ -n "$LOG_LEVEL" ]] ; then
+  echo "-----> Configuring Kibana log level"
+  $configure_log_level $KIBANA_DIR/config/kibana.yml
 fi
 
 cd $KIBANA_DIR
