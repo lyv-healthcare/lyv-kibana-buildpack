@@ -98,7 +98,7 @@ if [[ -n "$ELASTICSEARCH_USER" && -n "$ELASTICSEARCH_PASSWORD" ]] ; then
 fi
 
 if [[ -n "$LOG_LEVEL" ]] ; then
-  echo "-----> Configuring Kibana log level"
+  echo "-----> Configuring Kibana log level to '$LOG_LEVEL'"
   $configure_log_level $KIBANA_DIR/config/kibana.yml
 fi
 
