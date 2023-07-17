@@ -4,7 +4,7 @@ This buildpack downloads and installs Kibana into a Scalingo app image.
 
 ## Compatibility
 
-Tested against Kibana 6.8.23 - ES 6.8.23
+Tested against Kibana 7.10.2 - ES 7.10.2
 
 ## Usage
 
@@ -26,7 +26,7 @@ $ git commit -m "Prepare Kibana for Scalingo deployment"
 $ git push scalingo master
 ```
 
-That's it your Kibana is live, you may have to wait a few seconds to let kibana
+That's it, your Kibana is live! You may have to wait a few seconds for it to
 create its indexes, then refresh and the dashboard will be available.
 
 ## Elasticsearch Configuration
