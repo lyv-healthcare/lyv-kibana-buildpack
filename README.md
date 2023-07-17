@@ -16,7 +16,7 @@ $ scalingo create my-kibana
 $ scalingo env-set BUILDPACK_URL=https://github.com/Scalingo/kibana-buildpack
 
 # If you don't already have an elasticsearch instance from another app
-$ scalingo addons-add scalingo-elasticsearch free
+$ scalingo addons-add scalingo-elasticsearch elasticsearch-sandbox
 # If you already have the ES instance, refer its URL
 $ scalingo env-set ELASTICSEARCH_URL="http://user:password@host:port"
 
